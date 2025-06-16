@@ -1,0 +1,4 @@
+/code/.php-cs-fixer.cache
+/code/storage/task.log
+/code/storage/*.pid
+/.vscode
