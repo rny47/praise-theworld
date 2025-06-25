@@ -1,5 +1,5 @@
 import boto3
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 
 from .base import OssUploader
 
@@ -14,8 +14,10 @@ class AwsUploader(OssUploader):
 
     def upload_file(self, bucket: str, file_path: str, object_key: str,
                     expire_seconds: int) -> str:
+        # 这里缺少异常处理
         self.s3.upload_file(file_path, bucket, object_key)
-        expire_at = datetime.utcnow() + timedelta(seconds=expire_seconds)
+        # expire_at = datetime.utcnow() + timedelta(seconds=expire_seconds)
+        expire_at = datetime.now(timezone.utc) + timedelta(seconds=expire_seconds)
         self.s3.put_object_tagging(
             Bucket=bucket,
             Key=object_key,

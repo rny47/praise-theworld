@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from packager import create_secure_apk
 from uploader import AwsUploader, TencentUploader, AliyunUploader
@@ -13,7 +13,7 @@ def parse_args():
     p.add_argument('--provider', choices=['aws', 'tencent', 'aliyun'], required=True)
     p.add_argument('--bucket', required=True)
     p.add_argument('--object-key', required=True)
-    p.add_argument('--expire', type=int, default=86400)
+    p.add_argument('--expire', type=int, default=1)
     p.add_argument('--output-dir', default='output')
     return p.parse_args()
 
@@ -21,7 +21,7 @@ def parse_args():
 def get_uploader(provider: str):
     # 这里假设密钥信息通过环境变量或配置文件获取
     if provider == 'aws':
-        return AwsUploader('AK', 'SK', 'us-east-1')
+        return AwsUploader('AK', 'Zs', 'ap-east-1')
     if provider == 'tencent':
         return TencentUploader('ID', 'KEY', 'ap-guangzhou')
     if provider == 'aliyun':
@@ -31,10 +31,14 @@ def get_uploader(provider: str):
 
 def main():
     args = parse_args()
-    secure_apk = create_secure_apk(args.apk, args.output_dir)
+    # secure_apk = create_secure_apk(args.apk, args.output_dir)
+    secure_apk = args.apk
+    print('secure_apk:', secure_apk)
     uploader = get_uploader(args.provider)
     url = uploader.upload_file(args.bucket, secure_apk, args.object_key, args.expire)
-    expire_at = datetime.utcnow() + timedelta(seconds=args.expire)
+    print('uploaded:', url)
+    # expire_at = datetime.utcnow() + timedelta(seconds=args.expire)
+    expire_at = datetime.now(timezone.utc) + timedelta(seconds=args.expire)
     metadata.init_db()
     metadata.add_record(args.provider, args.bucket, args.object_key, expire_at)
     scheduler.start_cleanup_job({args.provider: uploader})
