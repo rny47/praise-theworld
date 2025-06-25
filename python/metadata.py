@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS uploads (
 )'''
 
 def init_db():
+    """初始化 SQLite 数据库"""
     conn = sqlite3.connect(DB_PATH)
     conn.execute(INIT_SQL)
     conn.commit()
@@ -21,6 +22,7 @@ def init_db():
 
 
 def add_record(provider: str, bucket: str, object_key: str, expire_at: datetime):
+    """新增上传记录"""
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
         'INSERT INTO uploads (provider, bucket, object_key, expire_at) VALUES (?,?,?,?)',
@@ -31,6 +33,7 @@ def add_record(provider: str, bucket: str, object_key: str, expire_at: datetime)
 
 
 def get_expired(now: datetime):
+    """获取所有已过期的记录"""
     conn = sqlite3.connect(DB_PATH)
     cur = conn.execute('SELECT id, provider, bucket, object_key FROM uploads WHERE expire_at <= ?', (now.isoformat(),))
     rows = cur.fetchall()
@@ -39,6 +42,7 @@ def get_expired(now: datetime):
 
 
 def delete_record(record_id: int):
+    """删除指定记录"""
     conn = sqlite3.connect(DB_PATH)
     conn.execute('DELETE FROM uploads WHERE id=?', (record_id,))
     conn.commit()

@@ -5,6 +5,7 @@ from packager import create_secure_apk
 from uploader import AwsUploader, TencentUploader, AliyunUploader
 import metadata
 import scheduler
+from config import load_config
 
 
 def parse_args():
@@ -19,13 +20,14 @@ def parse_args():
 
 
 def get_uploader(provider: str):
-    # 这里假设密钥信息通过环境变量或配置文件获取
+    """根据 provider 从环境变量加载配置并初始化上传实例"""
+    cfg = load_config(provider)
     if provider == 'aws':
-        return AwsUploader('AK', 'SK', 'us-east-1')
+        return AwsUploader(cfg.access_key, cfg.secret_key, cfg.region_or_endpoint)
     if provider == 'tencent':
-        return TencentUploader('ID', 'KEY', 'ap-guangzhou')
+        return TencentUploader(cfg.access_key, cfg.secret_key, cfg.region_or_endpoint)
     if provider == 'aliyun':
-        return AliyunUploader('AK', 'SK', 'oss-cn-hangzhou')
+        return AliyunUploader(cfg.access_key, cfg.secret_key, cfg.region_or_endpoint)
     raise ValueError('unsupported provider')
 
 
